@@ -57,7 +57,6 @@ class CNBCVideoIE(InfoExtractor):
     def _real_extract(self, url):
         name = self._match_id(url)
         webpage = self._download_webpage(url, name)
-        print("getting url", url, name)
 
         video_data = self._search_regex(
             (r'encodings":(\[.*?\])'), webpage, "encodings", default=None
@@ -73,5 +72,4 @@ class CNBCVideoIE(InfoExtractor):
                 embeddings[0]["url"], name, "mp4", m3u8_id="hls", fatal=False
             ),
         }
-        print(toReturn)
         return toReturn
