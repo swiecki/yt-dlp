@@ -52,15 +52,26 @@ class CNBCVideoIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        path, display_id = self._match_valid_url(url).groups()
-        video_id = self._download_json(
-            'https://webql-redesign.cnbcfm.com/graphql', display_id, query={
-                'query': '''{
-  page(path: "%s") {
-    vcpsId
-  }
-}''' % path,
-            })['data']['page']['vcpsId']
-        return self.url_result(
-            'http://video.cnbc.com/gallery/?video=%d' % video_id,
-            CNBCIE.ie_key())
+        name = self._match_id(url)
+        webpage = self._download_webpage(url, name)
+        print("getting url", url, name)
+
+        video_data = self._search_regex(
+            (r'encodings":(\[.*?\])'),
+            webpage, 'encodings', default=None)
+
+        if not video_data:
+            return
+        embeddings = json.loads(video_data)
+         toReturn= {
+            'id':name,
+            'title':name,
+            'formats':self._extract_m3u8_formats(
+            embeddings[0]["url"], 
+            name,
+            "mp4", 
+            m3u8_id="hls", 
+            fatal=False)
+        }
+        print(toReturn)
+        return toReturn
