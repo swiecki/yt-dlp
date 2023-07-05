@@ -1,7 +1,8 @@
 from .common import InfoExtractor
 from ..utils import smuggle_url
 import json
-
+import re
+import isodate
 
 class CNBCIE(InfoExtractor):
     _VALID_URL = r"https?://video\.cnbc\.com/gallery/\?video=(?P<id>[0-9]+)"
@@ -58,6 +59,27 @@ class CNBCVideoIE(InfoExtractor):
         name = self._match_id(url)
         webpage = self._download_webpage(url, name)
 
+        json_data = self._search_regex(
+            (r'<script type="application\/ld\+json">(.*?)<\/script>',),
+            webpage,
+            "json",
+            default=None,
+            flags=re.DOTALL,  # This makes '.' match also newline characters
+        )
+        data = json.loads(json_data)
+
+        description=data.get("description",None)
+        title = data.get("name", None)
+        upload_date = data.get("uploadDate", None)
+
+
+        #duration
+        duration = None
+        if data.get("duration", None):
+            duration_str = data.get("duration")  # your ISO 8601 duration string
+            duration = isodate.parse_duration(duration_str)
+            duration = duration.total_seconds()
+            
         video_data = self._search_regex(
             (r'encodings":(\[.*?\])'), webpage, "encodings", default=None
         )
@@ -68,6 +90,9 @@ class CNBCVideoIE(InfoExtractor):
         toReturn = {
             "id": name,
             "title": name,
+            "description": description,
+            "duration": duration,
+            "upload_date": upload_date,
             "formats": self._extract_m3u8_formats(
                 embeddings[0]["url"], name, "mp4", m3u8_id="hls", fatal=False
             ),
