@@ -49,6 +49,7 @@ class BloombergIE(InfoExtractor):
     def _real_extract(self, url):
         name = self._match_id(url)
         webpage = self._download_webpage(url, name)
+        print("source", webpage)
         video_id = self._search_regex(
             (
                 r'["\']resourceId["\']\s*:\s*(["\'])(?P<id>(?:(?!\1).)+)\1',
@@ -61,6 +62,7 @@ class BloombergIE(InfoExtractor):
             group="id",
             default=None,
         )
+        print(video_id)
         if not video_id:
             bplayer_data = self._parse_json(
                 self._search_regex(r"BPlayer\(null,\s*({[^;]+})\);", webpage, "id"),
