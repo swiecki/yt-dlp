@@ -44,7 +44,8 @@ class BloombergIE(InfoExtractor):
         name = self._match_id(url)
         webpage = self._download_webpage(url, name)
         video_id = self._search_regex(
-            (r'["\']bmmrId["\']\s*:\s*(["\'])(?P<id>(?:(?!\1).)+)\1',
+            (r'["\']resourceId["\']\s*:\s*(["\'])(?P<id>(?:(?!\1).)+)\1',
+             r'["\']bmmrId["\']\s*:\s*(["\'])(?P<id>(?:(?!\1).)+)\1',
              r'videoId\s*:\s*(["\'])(?P<id>(?:(?!\1).)+)\1',
              r'data-bmmrid=(["\'])(?P<id>(?:(?!\1).)+)\1'),
             webpage, 'id', group='id', default=None)
