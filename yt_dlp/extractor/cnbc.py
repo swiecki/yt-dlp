@@ -3,6 +3,7 @@ from ..utils import smuggle_url
 import json
 import re
 import isodate
+from datetime import datetime
 
 class CNBCIE(InfoExtractor):
     _VALID_URL = r"https?://video\.cnbc\.com/gallery/\?video=(?P<id>[0-9]+)"
@@ -70,7 +71,12 @@ class CNBCVideoIE(InfoExtractor):
 
         description=data.get("description",None)
         title = data.get("name", None)
-        upload_date = data.get("uploadDate", None)
+
+        upload_date = None
+        if data.get("uploadDate",None):
+            date_str = data.get("uploadDate", None)
+            date_obj = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            upload_date = date_obj.strftime('%Y%m%d')
 
 
         #duration
@@ -89,7 +95,7 @@ class CNBCVideoIE(InfoExtractor):
         embeddings = json.loads(video_data)
         toReturn = {
             "id": name,
-            "title": name,
+            "title": title,
             "description": description,
             "duration": duration,
             "upload_date": upload_date,
