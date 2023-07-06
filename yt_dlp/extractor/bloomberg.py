@@ -80,16 +80,16 @@ class BloombergIE(InfoExtractor):
         if raw_timestamp:
             timestamp = int(raw_timestamp)
             temp_date = datetime.datetime.utcfromtimestamp(timestamp)
-            upload_date = temp_date.strftime('%Y%m%d')
-        
+            upload_date = temp_date.strftime("%Y%m%d")
+
         duration = ""
         raw_duration = embed_info.get("duration", None)
         if raw_duration:
             duration_ms = int(raw_duration)
             duration = duration_ms // 1000
-        
+
         title = embed_info.get("title", "")
-        
+
         description = embed_info.get("description", "")
 
         formats = []
