@@ -1,3 +1,4 @@
+import datetime
 import re
 
 from .common import InfoExtractor
@@ -69,11 +70,28 @@ class BloombergIE(InfoExtractor):
                 name,
             )
             video_id = bplayer_data["id"]
-        title = re.sub(": Video$", "", self._og_search_title(webpage))
 
         embed_info = self._download_json(
             "http://www.bloomberg.com/multimedia/api/embed?id=%s" % video_id, video_id
         )
+
+        upload_date = ""
+        raw_timestamp = embed_info.get("createdUnixUTC", None)
+        if raw_timestamp:
+            timestamp = int(raw_timestamp)
+            temp_date = datetime.datetime.utcfromtimestamp(timestamp)
+            upload_date = temp_date.strftime('%Y%m%d')
+        
+        duration = ""
+        raw_duration = embed_info.get("duration", None)
+        if raw_duration:
+            duration_ms = int(raw_duration)
+            duration = duration_ms // 1000
+        
+        title = embed_info.get("title", "")
+        
+        description = embed_info.get("description", "")
+
         formats = []
         for stream in embed_info["streams"]:
             stream_url = stream.get("url")
@@ -96,6 +114,7 @@ class BloombergIE(InfoExtractor):
             "id": video_id,
             "title": title,
             "formats": formats,
-            "description": self._og_search_description(webpage),
-            "thumbnail": self._og_search_thumbnail(webpage),
+            "duration": duration,
+            "upload_date": upload_date,
+            "description": description,
         }
